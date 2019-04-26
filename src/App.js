@@ -1,26 +1,62 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { Component } from "react";
+import Header from "./components/header";
+import Headline from "./components/headline";
+import { connect } from "react-redux";
+import { getAllPosts } from "./duck/FetchPost";
+import ShareButton from "./components/button";
+import ListItem from "./components/listitem";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+class App extends Component {
+  constructor(props) {
+    super(props);
+  }
+
+  onButtonClick = () => {
+    console.log("Button clicked");
+    this.props.getAllPosts();
+  }
+
+  render() {
+    const configButton = {
+      buttonText: "Get posts",
+      emitEvent: this.onButtonClick,
+    };
+
+    const { posts } = this.props;
+
+    return (
+      <div className="App" data-test="appComponent">
+        <Header />
+        <section className="main">
+          <Headline header="Post" desc="Click the button to render posts" />
+          <ShareButton {...configButton} />
+          {
+            posts.length > 0 &&
+            <div>
+              {
+                posts.map((post, index) => {
+                  const { title, body } = post;
+                  const configListItem = {
+                    title,
+                    desc: body,
+                  };
+                  return (
+                    <ListItem key={index} {...configListItem} />
+                  );
+                })
+              }
+            </div>
+          }
+        </section>
+      </div>
+    );
+  }
 }
 
-export default App;
+function mapStateToProps(state) {
+  return {
+    posts: state.posts,
+  };
+}
+
+export default connect(mapStateToProps, { getAllPosts })(App);
